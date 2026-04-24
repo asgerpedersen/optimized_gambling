@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" async></script>
+</head>
+<body>
+    <!-- Introduction Scene-->
+     <div class="scene active info" id="scene-intro">
+        <p>Welcome to the experiment blablabla</p>
+     </div>
+
+    <!-- Instruction Auto-->
+     <div class="scene info" id="scene-instruction-auto">
+        <p>Instructions Auto</p>
+     </div>
+    
+    <!-- Instruction Press-->
+     <div class="scene info" id="scene-instruction-manual">
+        <p>Instructions Manual</p>
+     </div>
+
+    <!-- Extra spins? -->
+     <div class="scene info" id="scene-extra-spins?">
+        <p>Your current balance is <span id="balance-display">0</span><br>
+        Buy five extra spins? </p>
+     </div>
+
+    
+
+    <!-- Slots scene -->
+    <div class="scene" id="scene-slots">
+        <div class="slots">
+            <div class="reel"></div>
+            <div class="reel"></div>
+            <div class="reel"></div>
+        </div>
+    </div>
+
+    <!-- <img style="position:fixed; left: 0; top: 0; height: 100vh; width: auto;" src="images/slotreel.webp"> -->
+</body>
+</html>
+
