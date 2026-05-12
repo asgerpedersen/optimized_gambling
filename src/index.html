@@ -10,36 +10,71 @@
 </head>
 <body>
     <!-- Introduction Scene-->
-     <div class="scene active info" id="scene-intro">
-        <p>Welcome to the experiment blablabla</p>
+     <div class="scene info active" id="intro">
+        <p>Thank you for participating in our experiment! <br>
+        The experiment consist of 8 blocks. Each block is either "Automatic condition" or "Manual condition"<br>
+        In automatic blocks, the reels spin automatically. <br>
+        In manual blocks, you press SPACE to spin. <br>
+You will be informed about block type at the beginning of each block <br>
+You are given 40 free spins at the beginning of each block <br>
+At the end of each block you will have the chance to buy extra spins, to possibly win extra money.<br>
+<button id="start-btn">Click to begin</button></p>
      </div>
 
     <!-- Instruction Auto-->
-     <div class="scene info" id="scene-instruction-auto">
-        <p>Instructions Auto</p>
+     <div class="scene info" id="instruction-auto">
+        <p>Starting Block <span id="block-number-auto">1</span>/8 <br>
+        Automatic condition <br>
+    The block will begin shortly</p>
      </div>
     
-    <!-- Instruction Press-->
-     <div class="scene info" id="scene-instruction-manual">
-        <p>Instructions Manual</p>
+    <!-- Instruction Manual-->
+     <div class="scene info" id="instruction-manual">
+        <p>Starting Block <span id="block-number-manual">1</span>/8 <br>
+        Manual condition <br>
+    The block will begin shortly</p>
      </div>
 
     <!-- Extra spins? -->
-     <div class="scene info" id="scene-extra-spins?">
-        <p>Your current balance is <span id="balance-display">0</span><br>
-        Buy five extra spins? </p>
+     <div class="scene info" id="extra-spins?">
+        <p>Your current balance is <span id="balance-display-extra">0</span><br>
+        Buy five extra spins for 5 kr? <br>
+    PRESS 'Y' FOR EXTRA SPINS <br>
+    PRESS 'N' TO CONTINUE TO NEXT BLOCK</p>
      </div>
 
-    
-
+    <!-- Pleasure rating -->
+    <div class="scene info" id="pleasure-rating">
+        <p>How much pleasure did you experience during this block?<br>
+        Press the corresponding key on the keyboard</p>
+        <div class="rating-scale">
+            <button class="rating-btn" data-value="1">1</button>
+            <button class="rating-btn" data-value="2">2</button>
+            <button class="rating-btn" data-value="3">3</button>
+            <button class="rating-btn" data-value="4">4</button>
+            <button class="rating-btn" data-value="5">5</button>
+            <button class="rating-btn" data-value="6">6</button>
+        </div>
+        <p class="rating-labels">
+            <span>Low amounts of pleasure</span>
+            <span>High amounts of pleasure</span>
+        </p>
+    </div>
     <!-- Slots scene -->
-    <div class="scene" id="scene-slots">
+    <div class="scene" id="slots">
+        <p>SPINS LEFT <span id="current-spins-left">0</span></p>
         <div class="slots">
             <div class="reel"></div>
             <div class="reel"></div>
             <div class="reel"></div>
         </div>
+        <p>CURRENT PRIZE:<span id="balance-display-slots">0</span></p>
     </div>
+
+    <!-- Instruction Manual-->
+     <div class="scene info" id="exit-scene">
+        <p>The experiment is over, thank you for participating!</p>
+     </div>
 
     <!-- <img style="position:fixed; left: 0; top: 0; height: 100vh; width: auto;" src="images/slotreel.webp"> -->
 </body>

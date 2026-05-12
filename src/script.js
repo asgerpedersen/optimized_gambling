@@ -54,13 +54,19 @@ function rollAll(targets = null) {
 		.then((deltas) => {
 			// add up indexes
 			deltas.forEach((delta, i) => indexes[i] = (indexes[i] + delta)%num_icons);
+            // Notify Python that animation is done
+            fetch("http://localhost:8000/animation-done", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({status: "done"})
+            })
+            console.log("animation finished")
 
         // Win conditions
-        if (indexes[0] == indexes[1] || indexes[1] == indexes[2]) {
-            const winCls = indexes[0] == indexes[2] ? "win2" : "win1";
-            document.querySelector(".slots").classList.add(winCls);
-            setTimeout(() => document.querySelector(".slots").classList.remove(winCls), 2000)
-        }
+        if (indexes[0] == indexes[1] && indexes[1] == indexes[2]) {
+            document.querySelector(".slots").classList.add("win2")
+            setTimeout(() => document.querySelector(".slots").classList.remove("win2"), 2000)
+            }
         })
     
     console.log("reels found:", reelsList.length)   // should print 3
@@ -75,17 +81,32 @@ evtSource.onmessage = (event) => {
   console.log("Received:", data)
 
   if (data.type === "scene") {
-    // hide all scenes, show the target one
     document.querySelectorAll(".scene").forEach(el => el.classList.remove("active"))
-    document.getElementById("scene-" + data.name).classList.add("active")
-  }
+    const target = document.getElementById(data.name)
+    console.log("switching to scene:", data.name, "element found:", target)
+    target.classList.add("active")
+}
+
+  if (data.type === "block-start") {
+    document.getElementById("block-number-auto").textContent = data.block_number
+    document.getElementById("block-number-manual").textContent = data.block_number
+    }
+
+  if (data.name === "pleasure-rating") {
+    document.querySelectorAll(".rating-btn").forEach(btn => btn.classList.remove("selected"))
+    }
 
   if (data.type === "roll") {
     rollAll(data.targets)
   }
 
   if (data.type === "balance") {
-    document.getElementById("balance-display").textContent = data.balance
+    document.getElementById("balance-display-extra").textContent = data.balance
+    document.getElementById("balance-display-slots").textContent = data.balance
+}
+
+  if (data.type == "spins-left") {
+    document.getElementById("current-spins-left").textContent = data.spins_left
   }
 }
 
@@ -97,8 +118,60 @@ document.addEventListener("keydown", (e) => {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({key: key})
     }).then(() => console.log("Keypress sent to Python"))
+
+    // handle pleasure rating keys
+    const pleasureScene = document.getElementById("pleasure-rating")
+    if (pleasureScene.classList.contains("active")) {
+        const rating = parseInt(e.key)
+        if (rating >= 1 && rating <= 6) {
+            // highlight the corresponding button
+            document.querySelectorAll(".rating-btn").forEach(btn => btn.classList.remove("selected"))
+            document.querySelector(`.rating-btn[data-value="${rating}"]`).classList.add("selected")
+
+            // send rating to Python
+            fetch("http://localhost:8000/rating", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({rating: rating})
+            })
+        }
+    }
 })
+
+// Click listner
+document.querySelectorAll(".rating-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        // highlight selected button
+        document.querySelectorAll(".rating-btn").forEach(b => b.classList.remove("selected"))
+        btn.classList.add("selected")
+
+        // send rating to Python
+        const rating = parseInt(btn.dataset.value)
+        fetch("http://localhost:8000/rating", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({rating: rating})
+        })
+    })
+})
+
 
 evtSource.onerror = () => {
   console.error("SSE connection lost")
 }
+
+
+// Enter fullscreen when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+    document.documentElement.requestFullscreen()
+})
+
+document.getElementById("start-btn").addEventListener("click", () => {
+    document.documentElement.requestFullscreen()
+    document.body.style.cursor = "none"
+    fetch("http://localhost:8000/keypress", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({key: "start"})
+    })
+})
