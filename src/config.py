@@ -11,15 +11,15 @@ quitKeys = ['esc','escape']
 # ==================== GAME SETTINGS ====================
 start_balance = 0
 cost = 7
-win_price = 20
-extra_spins_cost = 10
-extra_spins_amount = 5
+win_price = 3
+extra_spins_cost = 4
+extra_spins_amount = 5      # number of extra spins
 
-block_size = 10             # number of trials pr block
+block_size = 40             # number of trials pr block
 end_seq_length = 5          # number of trials in end sequence
 
 # Time settings
-between_trial_wait = 3      # in seconds (i think)
+between_trial_wait = 2      # in seconds (i think)
 instruction_wait = 5
 
 # Settings for trial combinations
@@ -44,7 +44,7 @@ def expectedBlockWinnings(start_balance, size, win_price, cost, distribution_key
 
 # ==================== DATA SETTINGS ====================
 # Data containers for each trial
-subjectID = 69
+subjectID = 000
 dataCategories = ['Block_number', 'Block_type','Trial_number', 'Trial_type', 'RT', 'Block_pleasure', 'Balance']
 
 # File paths

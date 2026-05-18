@@ -40,21 +40,26 @@ const roll = (reel, offset = 0, target = null) => {
 };
 
 function rollAll(targets = null) {
-    const reelsList = document.querySelectorAll('.slots > .reel');
+    const reelsList = document.querySelectorAll('.slots > .reel')
+    let settledCount = 0
 
-    // const targets = window.timesRolled && window.timesRolled%2 ? [6, 6, 6] : null;
-	// if (!window.timesRolled) window.timesRolled = 0;
-	// window.timesRolled++;
-    
     Promise
-        // Activate each reel, must convert NodeList to Array for this with spread operator
-		.all( [...reelsList].map((reel, i) => roll(reel, i, targets ? targets[i] : null)) )	
-		
-		// When all reels done animating (all promises solve)
-		.then((deltas) => {
-			// add up indexes
-			deltas.forEach((delta, i) => indexes[i] = (indexes[i] + delta)%num_icons);
-            // Notify Python that animation is done
+        .all([...reelsList].map((reel, i) => 
+            roll(reel, i, targets !== null ? targets[i] : null).then((delta) => {
+                settledCount++
+                if (settledCount === 2) {
+                    fetch("http://localhost:8000/partial-stop", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({status: "partial"})
+                    })
+                }
+                return delta
+            })
+        ))
+        .then((deltas) => {
+            deltas.forEach((delta, i) => indexes[i] = (indexes[i] + delta) % num_icons)
+
             fetch("http://localhost:8000/animation-done", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -62,14 +67,13 @@ function rollAll(targets = null) {
             })
             console.log("animation finished")
 
-        // Win conditions
-        if (indexes[0] == indexes[1] && indexes[1] == indexes[2]) {
-            document.querySelector(".slots").classList.add("win2")
-            setTimeout(() => document.querySelector(".slots").classList.remove("win2"), 2000)
+            if (indexes[0] == indexes[1] && indexes[1] == indexes[2]) {
+                document.querySelector(".slots").classList.add("win2")
+                setTimeout(() => document.querySelector(".slots").classList.remove("win2"), 2000)
             }
         })
-    
-    console.log("reels found:", reelsList.length)   // should print 3
+
+    console.log("reels found:", reelsList.length)
     console.log("targets:", targets)
 }
 
@@ -90,6 +94,7 @@ evtSource.onmessage = (event) => {
   if (data.type === "block-start") {
     document.getElementById("block-number-auto").textContent = data.block_number
     document.getElementById("block-number-manual").textContent = data.block_number
+    document.getElementById("block-number-global").textContent = data.block_number
     }
 
   if (data.name === "pleasure-rating") {
@@ -104,6 +109,11 @@ evtSource.onmessage = (event) => {
     document.getElementById("balance-display-extra").textContent = data.balance
     document.getElementById("balance-display-slots").textContent = data.balance
 }
+
+  if (data.type === "global_balance") {
+        document.getElementById("payout-balance").textContent = data.global_balance
+        document.getElementById("payout-balance-exit").textContent = data.global_balance
+  }
 
   if (data.type == "spins-left") {
     document.getElementById("current-spins-left").textContent = data.spins_left

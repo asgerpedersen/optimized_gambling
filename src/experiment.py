@@ -10,15 +10,15 @@ import config
 #----EEG--Setup-------------------------------------
 
 # Define the port Remove comments when you run experiment
-# port = serial.Serial('/dev/tty.usbserial-DN2Q03LO', 115200) 
+port = serial.Serial('/dev/tty.usbserial-DN2Q03LO', 115200) 
 
-# def trigger(code):
-#    port.write(code.to_bytes(1, 'big'))
-#    print('trigger sent {}'.format(code))
+def trigger(code):
+   port.write(code.to_bytes(1, 'big'))
+   print('trigger sent {}'.format(code))
 
 # dummy trigger:
-def trigger(code):
-    pass
+# def trigger(code):
+#     print("trigger: ", code)
 
 #----Server-setup-----------------------------------
 app = Flask(__name__)
@@ -116,6 +116,17 @@ def waitForAnimation():
     animation_event.clear()
     animation_event.wait()
 
+partial_stop_event = threading.Event()
+
+@app.route("/partial-stop", methods=["POST"])
+def partial_stop():
+    partial_stop_event.set()
+    return jsonify({"ok": True})
+
+def waitForPartialStop():
+    partial_stop_event.clear()
+    partial_stop_event.wait()
+
 # Starting the server in a background thread.
 threading.Thread(
     target=lambda: app.run(port=8000, threaded=True),
@@ -164,11 +175,42 @@ class slotMachineTask:
 
     def runTrial(self, trial_data, reel_stop, auto):                                             
         self.trial_number += 1
+        
+                                                                                            # Decide partial stop trigger code for trial
+        if auto and self.trialType(reel_stop) == "win":                                     # auto partial_stop_win
+             partial_stop_trigger_code = 121
+        elif not auto and self.trialType(reel_stop) == "win":                               # manual partial_stop_win
+             partial_stop_trigger_code = 221
+        elif auto and self.trialType(reel_stop) == "near_miss":                              # auto partial_stop_near_miss
+             partial_stop_trigger_code = 122
+        elif not auto and self.trialType(reel_stop) == "near_miss":                          # manual partial_stop_near_miss
+             partial_stop_trigger_code = 222
+        elif auto and self.trialType(reel_stop) == "miss":                                     # auto partial_stop_miss
+             partial_stop_trigger_code = 123
+        elif not auto and self.trialType(reel_stop) == "miss":                               # manual partial_stop_miss
+             partial_stop_trigger_code = 223
+
+
+                                                                                            # Decide full stop trigger code for trial
+        if auto and self.trialType(reel_stop) == "win":                                     # auto full_stop_win
+             full_stop_trigger_code = 131
+        elif not auto and self.trialType(reel_stop) == "win":                               # manual full_stop_win
+             full_stop_trigger_code = 231
+        elif auto and self.trialType(reel_stop) == "near_miss":                              # auto full_stop_near_miss
+             full_stop_trigger_code = 132
+        elif not auto and self.trialType(reel_stop) == "near_miss":                          # manual full_stop_near_miss
+             full_stop_trigger_code = 232
+        elif auto and self.trialType(reel_stop) == "miss":                                     # auto full_stop_miss
+             full_stop_trigger_code = 133
+        elif not auto and self.trialType(reel_stop) == "miss":                               # manual full_stop_miss
+             full_stop_trigger_code = 233
 
         if auto:                                                                            # If auto trial, send trial to frontend
+            time.sleep(between_trial_wait)
             self.spins_left -= 1
             send({"type": "spins-left", "spins_left": self.spins_left})
             send({"type": "roll", "targets": reel_stop})
+            trigger(11)
             trial_data['RT'] = None
         else:                                                                                # If trial is not auto, wait for key response
             t_start = time.time()
@@ -179,6 +221,7 @@ class slotMachineTask:
                 self.spins_left -= 1
                 send({"type": "spins-left", "spins_left": self.spins_left})
                 send({"type": "roll", "targets": reel_stop})
+                trigger(21)
                 trial_data['RT'] = response_time
 
             if key in quitKeys:
@@ -197,13 +240,22 @@ class slotMachineTask:
         trial_data['Block_pleasure'] = None
         
         self.results.append(trial_data) 
+        waitForPartialStop()                  
+        trigger(partial_stop_trigger_code)    
         waitForAnimation()                                                                  # Waits till js animation is done
-        trigger(100) #foo
+        trigger(full_stop_trigger_code)
         send({"type": "balance", "balance": self.current_balance})
+        
                                                                   # Push results to Results list
 
     def runBlock(self, auto, distribution_key_index, end_sequence_type):                                                 
-        
+        if auto:
+            accept_extra_spins_trigger_code = 101
+            pleasure_rating_1_trigger_code = 191
+        elif not auto:
+            accept_extra_spins_trigger_code = 201
+            pleasure_rating_1_trigger_code = 291
+
         distribution_key = config.main_trials_distribution_keys[distribution_key_index]
         
         self.trial_number = 0                                                                   # Reset trial number
@@ -231,12 +283,11 @@ class slotMachineTask:
 
         for trial in trials:
             if auto:                                                                            # On manual trials there is no inbetween wait
-                time.sleep(between_trial_wait)
                 self.runTrial({}, trial, auto)
             else:
                 self.runTrial({}, trial, auto)
         
-        for trial in end_sequence:                                                              # Run end-sequence
+        for trial in end_sequence:                                                             # Run end-sequence
             self.runTrial({},trial, auto)   
 
         time.sleep(1)
@@ -250,6 +301,7 @@ class slotMachineTask:
                 break
         
         if key == 'y':
+            trigger(accept_extra_spins_trigger_code)
             self.current_balance -= config.extra_spins_cost
             self.current_balance += config.extra_spins_amount
             self.spins_left = 5
@@ -259,12 +311,22 @@ class slotMachineTask:
             time.sleep(1)
             for trial in extra_spins:
                 self.runTrial({}, trial, auto)
+        else:
+            trigger(accept_extra_spins_trigger_code+1)
         
         time.sleep(0.5)
         self.global_balance += self.current_balance
+
+        # Show current global balance scene
+        send({"type": "block-start", "block_number": self.block_number}) 
+        send({"type": "global_balance", "global_balance": self.global_balance})
+        send({"type": "scene", "name": "global-balance"})
+        time.sleep(5)
+
         
         send({"type": "scene", "name": "pleasure-rating"})
         block_pleasure = waitForRating()
+        trigger(pleasure_rating_1_trigger_code + block_pleasure - 1)
         print(f"Block pleasure rating: {block_pleasure}")
 
         # # add rating to all trials in this block
@@ -287,6 +349,7 @@ class slotMachineTask:
             x,y,z = block_type
             self.runBlock(x,y,z)
         
+        send({"type": "global_balance", "global_balance": self.global_balance})
         send({"type": "scene", "name": "exit-scene"})
         time.sleep(1)
         self.saveResults()

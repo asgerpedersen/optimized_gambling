@@ -11,12 +11,12 @@
 <body>
     <!-- Introduction Scene-->
      <div class="scene info active" id="intro">
-        <p>Thank you for participating in our experiment! <br>
-        The experiment consist of 8 blocks. Each block is either "Automatic condition" or "Manual condition"<br>
+        <p>Thank you for participating in our experiment! <br> <br>
+        The experiment consist of 8 blocks. Each block is either "Automatic" or "Manual"<br>
         In automatic blocks, the reels spin automatically. <br>
         In manual blocks, you press SPACE to spin. <br>
-You will be informed about block type at the beginning of each block <br>
-You are given 40 free spins at the beginning of each block <br>
+You will be informed about block type at the beginning of each block <br> <br>
+You are given 45 free spins at the beginning of each block <br>
 At the end of each block you will have the chance to buy extra spins, to possibly win extra money.<br>
 <button id="start-btn">Click to begin</button></p>
      </div>
@@ -37,8 +37,8 @@ At the end of each block you will have the chance to buy extra spins, to possibl
 
     <!-- Extra spins? -->
      <div class="scene info" id="extra-spins?">
-        <p>Your current balance is <span id="balance-display-extra">0</span><br>
-        Buy five extra spins for 5 kr? <br>
+        <p>You won <span id="balance-display-extra">0</span> kr this block.<br>
+        Do you want to buy five extra spins for 4 kr? <br>
     PRESS 'Y' FOR EXTRA SPINS <br>
     PRESS 'N' TO CONTINUE TO NEXT BLOCK</p>
      </div>
@@ -60,20 +60,28 @@ At the end of each block you will have the chance to buy extra spins, to possibl
             <span>High amounts of pleasure</span>
         </p>
     </div>
+
+    <!-- Global balance display -->
+     <div class="scene info" id="global-balance">
+        <p>End of block <span id="block-number-global">1</span> <br> <br> Your current total balance is: <span id="payout-balance">0</span> kr</p>
+     </div>
+
     <!-- Slots scene -->
     <div class="scene" id="slots">
-        <p>SPINS LEFT <span id="current-spins-left">0</span></p>
+        <p>SPINS LEFT: <span id="current-spins-left">0</span></p>
         <div class="slots">
             <div class="reel"></div>
             <div class="reel"></div>
             <div class="reel"></div>
         </div>
-        <p>CURRENT PRIZE:<span id="balance-display-slots">0</span></p>
+        <p>CURRENT PRIZE: <span id="balance-display-slots">0</span></p>
     </div>
 
-    <!-- Instruction Manual-->
+
+
+    <!-- Thank you for participating-->
      <div class="scene info" id="exit-scene">
-        <p>The experiment is over, thank you for participating!</p>
+        <p>The experiment is over, thank you for participating! <br> <br> Your PAYOUT is <span id="payout-balance-exit">0</span> </p>
      </div>
 
     <!-- <img style="position:fixed; left: 0; top: 0; height: 100vh; width: auto;" src="images/slotreel.webp"> -->
