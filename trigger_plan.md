@@ -19,18 +19,6 @@
 | manual | accept_extra_spins | 201 |
 | auto | decline_extra_spins | 102 |
 | manual | decline_extra_spins | 202 |
-| auto | pleasure_rating_1 | 191 |
-| manual | pleasure_rating_1 | 291 |
-| auto | pleasure_rating_2 | 192 |
-| manual | pleasure_rating_2 | 292 |
-| auto | pleasure_rating_3 | 193 |
-| manual | pleasure_rating_3 | 293 |
-| auto | pleasure_rating_4 | 194 |
-| manual | pleasure_rating_4 | 294 |
-| auto | pleasure_rating_5 | 195 |
-| manual | pleasure_rating_5 | 295 |
-| auto | pleasure_rating_6 | 196 |
-| manual | pleasure_rating_6 | 296 |
 
 ## A note about code generation
 - The first decimal corresponds to condition: auto; 1, manual; 2
