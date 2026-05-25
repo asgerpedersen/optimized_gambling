@@ -326,7 +326,7 @@ class slotMachineTask:
         
         send({"type": "scene", "name": "pleasure-rating"})
         block_pleasure = waitForRating()
-        trigger(pleasure_rating_1_trigger_code + block_pleasure - 1)
+        # trigger(pleasure_rating_1_trigger_code + block_pleasure - 1)
         print(f"Block pleasure rating: {block_pleasure}")
 
         # # add rating to all trials in this block

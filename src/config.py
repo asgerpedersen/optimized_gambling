@@ -44,7 +44,7 @@ def expectedBlockWinnings(start_balance, size, win_price, cost, distribution_key
 
 # ==================== DATA SETTINGS ====================
 # Data containers for each trial
-subjectID = 000
+subjectID = 111
 dataCategories = ['Block_number', 'Block_type','Trial_number', 'Trial_type', 'RT', 'Block_pleasure', 'Balance']
 
 # File paths
