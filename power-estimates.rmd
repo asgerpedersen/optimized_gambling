@@ -1,0 +1,59 @@
+
+```{r}
+library(lme4)
+
+set.seed(123)
+
+n_subjects <- 26
+n_sim <- 200
+
+p_low <- 0.50
+p_high <- 0.70
+
+significant <- rep(FALSE, n_sim)
+
+for (i in 1:n_sim) {
+  subject <- rep(1:n_subjects, each = 8)
+  end_sequence <- rep(c("low", "high"), each = 4, times = n_subjects)
+  subject_bias <- rnorm(n_subjects, mean = 0, sd = 0.7)
+  
+  probability <- ifelse(
+    end_sequence == "low",
+    plogis(qlogis(p_low) + subject_bias[subject]),
+    plogis(qlogis(p_high) + subject_bias[subject])
+  )
+  
+  purchase <- rbinom(
+    n = length(probability),
+    size = 1,
+    prob = probability
+  )
+  
+  data <- data.frame(
+    subject = subject,
+    end_sequence = end_sequence,
+    purchase = purchase
+  )
+  
+  data$end_sequence <- factor(data$end_sequence, levels = c("low", "high"))
+  
+  model <- suppressWarnings(
+    suppressMessages(
+      glmer(
+        purchase ~ end_sequence + (1 | subject),
+        data = data,
+        family = binomial
+      )
+    )
+  )
+  
+  p_value <- summary(model)$coefficients["end_sequencehigh", "Pr(>|z|)"]
+  
+  significant[i] <- p_value < 0.05
+}
+
+mean(significant)
+```
+
+
+
